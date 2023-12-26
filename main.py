@@ -2,7 +2,7 @@ import torch
 from inference import LLaMA
 
 if __name__ == '__main__':
-    torch.manual_seed(0)
+    torch.manual_seed(1)
     use_cuda = True
     device = "cuda" if torch.cuda.is_available() and use_cuda else "cpu"
     prompts = [
@@ -14,12 +14,8 @@ if __name__ == '__main__':
         sea otter => loutre de mer
         peppermint => menthe poivrée
         plush girafe => girafe peluche
-        cheese =>""",
-        # Zero shot prompt
-        """Tell me if the following person is actually Doraemon disguised as human:
-        Name: Sachin Tendulkar
-        Decision: 
-        """
+        cheese => ?""",
+        "Tell me the rules of cricket"
     ]
 
     model = LLaMA.build(
