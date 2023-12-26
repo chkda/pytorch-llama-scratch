@@ -77,7 +77,7 @@ class LLaMA:
         cur_iterator = tqdm(range(1, total_len), desc="Generating Tokens")
         for cur_pos in cur_iterator:
             with torch.no_grad():
-                logits = self.model(tokens[:, cur_pos-1:cur_pos], cur_pos)
+                logits = self.model.forward(tokens[:, cur_pos-1:cur_pos], cur_pos)
             if temperature > 0:
                 probs = torch.softmax(logits[:, -1] / temperature, dim=-1)
                 next_token = self._sample_top_p(probs, top_p)

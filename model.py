@@ -9,7 +9,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ModelArgs:
-    dim: int = 400
+    dim: int = 4096
     n_layers: int = 32
     n_heads: int = 32
     n_kv_heads: Optional[int] = None
@@ -45,15 +45,13 @@ class FeedForward(nn.Module):
         hidden_dim = int(2 * hidden_dim/3)
         if args.ffn_dim_multiplier is not None:
             hidden_dim = int(args.ffn_dim_multiplier * hidden_dim)
-
         hidden_dim = args.multiple_of * ((hidden_dim + args.multiple_of - 1) // args.multiple_of)
         self.w1 = nn.Linear(args.dim, hidden_dim, bias=False)
         self.w2 = nn.Linear(hidden_dim, args.dim, bias=False)
         self.w3 = nn.Linear(args.dim, hidden_dim, bias=False)
 
     def forward(self, x: torch.Tensor):
-        x = self.w1(x)
-        swish = F.silu(x)
+        swish = F.silu(self.w1(x))
         x_V = self.w3(x)
         x = swish * x_V
         x = self.w2(x)
@@ -158,8 +156,8 @@ class EncoderBlock(nn.Module):
         self.ffn_norm = RMSNorm(args.dim, eps=args.norm_eps)
 
     def forward(self, x: torch.Tensor, start_pos: int, freqs_complex: torch.Tensor):
-        h = x + self.attention(self.attention_norm(x), start_pos, freqs_complex)
-        out = h + self.feed_forward(self.ffn_norm(h))
+        h = x + self.attention.forward(self.attention_norm(x), start_pos, freqs_complex)
+        out = h + self.feed_forward.forward(self.ffn_norm(h))
         return out
 
 
