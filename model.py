@@ -109,7 +109,7 @@ class SelfAttention(nn.Module):
         self.cache_v = torch.zeros((args.max_batch_size, args.max_seq_len, self.n_kv_heads, self.head_dim))
 
     def forward(self, x: torch.Tensor, start_pos: int, freqs_complex: torch.Tensor):
-        batch_size, seq_len = x.shape
+        batch_size, seq_len, _ = x.shape
         xq = self.wq(x)
         xk = self.wk(x)
         xv = self.wv(x)
@@ -129,6 +129,10 @@ class SelfAttention(nn.Module):
 
         keys = repeat_kv(keys, self.n_rep)
         values = repeat_kv(values, self.n_rep)
+        
+        xq = xq.transpose(1, 2)
+        keys = keys.transpose(1, 2)
+        values = values.transpose(1, 2)
 
         scores = torch.matmul(xq, keys.transpose(2, 3)) / math.sqrt(self.head_dim)
         scores = F.softmax(scores.float(), dim=-1).type_as(xq)

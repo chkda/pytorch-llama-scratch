@@ -42,9 +42,9 @@ class LLaMA:
         model_args.vocab_size = tokenizer.vocab_size()
 
         if device == "cuda":
-            torch.set_default_dtype(torch.cuda.HalfTensor)
+            torch.set_default_tensor_type(torch.cuda.HalfTensor)
         else:
-            torch.set_default_dtype(torch.BFloat16Tensor)
+            torch.set_default_tensor_type(torch.BFloat16Tensor)
 
         model = Transformer(model_args).to(device)
 
@@ -70,7 +70,7 @@ class LLaMA:
         tokens = torch.full((batch_size, total_len), pad_id, dtype=torch.long, device=device)
 
         for k, t in enumerate(prompt_tokens):
-            tokens[k, :, len(t)] = torch.tensor(t, dtype=torch.long, device=device)
+            tokens[k, :len(t)] = torch.tensor(t, dtype=torch.long, device=device)
 
         eos_reached = torch.tensor([False] * batch_size, device=device)
         prompt_tokens_mask = tokens != pad_id
